@@ -1,5 +1,9 @@
 
 
+using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
+using Microsoft.OpenApi.Models;
+using System.Net;
+
 namespace SyncOverAsync_Functions
 {
     public class SyncOverAsyncApi
@@ -17,11 +21,17 @@ namespace SyncOverAsync_Functions
             return default;
         }
 
-        [FunctionName("SyncOverAsyncApi_Request")]
-        public async Task<HttpResponseMessage> HttpStart([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequestMessage req,
+        [FunctionName("SyncOverAsyncApi_WeatherRequest")]
+        [OpenApiOperation(operationId: "GetWeather", tags: new[] { "weather" })]
+        //[OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
+        //[OpenApiParameter(name: "name", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The **Name** parameter")]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "text/plain", bodyType: typeof(string), Description = "The OK response")]
+
+        public async Task<HttpResponseMessage> GetWeather([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestMessage req,
             [DurableClient] IDurableOrchestrationClient starter)
         {
-            return default;
+            return await Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
         }
+
     }
 }
