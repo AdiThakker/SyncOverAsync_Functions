@@ -1,7 +1,4 @@
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.DurableTask;
-using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Extensions.Logging;
+
 
 namespace SyncOverAsync_Functions
 {
@@ -16,15 +13,15 @@ namespace SyncOverAsync_Functions
 
         [FunctionName("Sync-Over-Async-Api-DurableFunction")]
         public static async Task<List<string>> RunOrchestrator([OrchestrationTrigger] IDurableOrchestrationContext context)
-        { 
-            
+        {
+            return default;
         }
 
         [FunctionName("SyncOverAsyncApi_Request")]
         public async Task<HttpResponseMessage> HttpStart([HttpTrigger(AuthorizationLevel.Anonymous, "get", "post")] HttpRequestMessage req,
             [DurableClient] IDurableOrchestrationClient starter)
         {
-            
+            return default;
         }
     }
 }

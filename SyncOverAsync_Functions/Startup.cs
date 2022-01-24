@@ -1,5 +1,4 @@
-﻿using Microsoft.Azure.Functions.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
+﻿
 
 namespace SyncOverAsync_Functions
 {
