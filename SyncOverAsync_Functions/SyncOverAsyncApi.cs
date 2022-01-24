@@ -8,19 +8,17 @@ namespace SyncOverAsync_Functions
 {
     public class SyncOverAsyncApi
     {
-        public ILogger<SyncOverAsyncApi> Logger { get; }
+        public ILogger<SyncOverAsyncApi> Logger { get; }        
+        
+        private Random randomGenerator = new Random();
+        private const string OrchestrationFunctionName = "Sync-Over-Async-Api-DurableFunction";
+        const string OrchestrationComplete = "weather_async_response";
 
         public SyncOverAsyncApi(ILogger<SyncOverAsyncApi> logger)
         {
             Logger = logger;
         }
-
-        [FunctionName("Sync-Over-Async-Api-DurableFunction")]
-        public static async Task<List<string>> RunOrchestrator([OrchestrationTrigger] IDurableOrchestrationContext context)
-        {
-            return default;
-        }
-
+        
         [FunctionName("SyncOverAsyncApi_WeatherRequest")]
         [OpenApiOperation(operationId: "GetWeather", tags: new[] { "weather" })]
         //[OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
@@ -30,8 +28,24 @@ namespace SyncOverAsync_Functions
         public async Task<HttpResponseMessage> GetWeather([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestMessage req,
             [DurableClient] IDurableOrchestrationClient starter)
         {
-            return await Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+            var requestId = randomGenerator.Next(Int32.MaxValue).ToString();
+
+            // Start new orchestration
+            await starter.StartNewAsync(OrchestrationFunctionName, requestId.ToString());
+            this.Logger.LogInformation($"Started orchestration for {requestId}");
+
+            // Wait for orchestration to complete or timeout to occur
+            var completion = await starter.WaitForCompletionOrCreateCheckStatusResponseAsync(req, requestId.ToString(), TimeSpan.FromSeconds(60));
+            if (completion.StatusCode != HttpStatusCode.OK)
+            {
+                await starter.TerminateAsync(requestId, "Timeout Occured"); // Log additional context (if any)
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            }
+
+            return completion;
         }
 
+        [FunctionName(OrchestrationFunctionName)]
+        public static async Task<string> RunOrchestrator([OrchestrationTrigger] IDurableOrchestrationContext context) => await context.WaitForExternalEvent<string>(OrchestrationComplete);
     }
 }
