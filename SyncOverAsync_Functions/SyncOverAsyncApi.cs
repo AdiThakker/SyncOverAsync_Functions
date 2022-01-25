@@ -20,7 +20,7 @@ namespace SyncOverAsync_Functions
         }
         
         [FunctionName("SyncOverAsyncApi_WeatherRequest")]
-        [OpenApiOperation(operationId: "GetWeather", tags: new[] { "weather" })]
+        [OpenApiOperation(operationId: "GetWeatherAsync", tags: new[] { "weather" })]
         //[OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
         //[OpenApiParameter(name: "name", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The **Name** parameter")]
         [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "text/plain", bodyType: typeof(string), Description = "The OK response")]
@@ -46,6 +46,15 @@ namespace SyncOverAsync_Functions
         }
 
         [FunctionName(OrchestrationFunctionName)]
-        public static async Task<string> RunOrchestrator([OrchestrationTrigger] IDurableOrchestrationContext context) => await context.WaitForExternalEvent<string>(OrchestrationComplete);
+        public async Task<string> RunOrchestrator([OrchestrationTrigger] IDurableOrchestrationContext context) => await context.WaitForExternalEvent<string>(OrchestrationComplete);
+    
+        [FunctionName("SyncOverAsyncApi_WeatherReply")]
+        public async Task WeatherReply([BlobTrigger("devstoreaccount1/weather-results/{name}", Connection = "blobConnection")] Stream myBlob, string name,
+                                       [DurableClient] IDurableOrchestrationClient client)
+        {
+            var requestId = name;
+            await client.RaiseEventAsync(requestId, OrchestrationComplete, new StreamReader(myBlob).ReadToEnd());
+            this.Logger.LogInformation($"C# Blob trigger function Processed blob\n Name:{name} \n Size: {myBlob.Length} Bytes");
+        }
     }
 }
