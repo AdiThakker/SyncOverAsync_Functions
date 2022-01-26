@@ -4,3 +4,6 @@ global using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 global using Microsoft.Azure.WebJobs.Extensions.Http;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
+global using Microsoft.OpenApi.Models;
+global using System.Net;
