@@ -12,10 +12,7 @@ public class SyncOverAsyncApi
 
     [FunctionName("SyncOverAsyncApi_WeatherRequest")]
     [OpenApiOperation(operationId: "GetWeatherAsync", tags: new[] { "weather" })]
-    //[OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
-    //[OpenApiParameter(name: "name", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The **Name** parameter")]
     [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "text/plain", bodyType: typeof(string), Description = "The OK response")]
-
     public async Task<HttpResponseMessage> GetWeather([HttpTrigger(AuthorizationLevel.Anonymous, "get")] HttpRequestMessage req,
         [DurableClient] IDurableOrchestrationClient starter)
     {
@@ -45,6 +42,6 @@ public class SyncOverAsyncApi
     {
         var requestId = name.Remove(name.IndexOf('.'));
         await client.RaiseEventAsync(requestId, OrchestrationComplete, new StreamReader(myBlob).ReadToEnd());
-        this.Logger.LogInformation($"C# Blob trigger function Processed blob\n Name:{name} \n Size: {myBlob.Length} Bytes");
+        this.Logger.LogInformation($"Received reply for Request:{name}");
     }
 }
