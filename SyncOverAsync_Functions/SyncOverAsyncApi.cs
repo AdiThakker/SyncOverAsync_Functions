@@ -49,10 +49,10 @@ namespace SyncOverAsync_Functions
         public async Task<string> RunOrchestrator([OrchestrationTrigger] IDurableOrchestrationContext context) => await context.WaitForExternalEvent<string>(OrchestrationComplete);
     
         [FunctionName("SyncOverAsyncApi_WeatherReply")]
-        public async Task WeatherReply([BlobTrigger("devstoreaccount1/weather-results/{name}", Connection = "blobConnection")] Stream myBlob, string name,
+        public async Task WeatherReply([BlobTrigger("weather-results/{name}", Connection = "blobConnection")] Stream myBlob, string name,
                                        [DurableClient] IDurableOrchestrationClient client)
         {
-            var requestId = name;
+            var requestId = name.Remove(name.IndexOf('.'));
             await client.RaiseEventAsync(requestId, OrchestrationComplete, new StreamReader(myBlob).ReadToEnd());
             this.Logger.LogInformation($"C# Blob trigger function Processed blob\n Name:{name} \n Size: {myBlob.Length} Bytes");
         }
