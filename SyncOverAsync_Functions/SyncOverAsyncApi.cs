@@ -1,5 +1,3 @@
-
-
 namespace SyncOverAsync_Functions;
 
 public class SyncOverAsyncApi
@@ -10,10 +8,7 @@ public class SyncOverAsyncApi
     private const string OrchestrationFunctionName = "Sync-Over-Async-Api-DurableFunction";
     const string OrchestrationComplete = "weather_async_response";
 
-    public SyncOverAsyncApi(ILogger<SyncOverAsyncApi> logger)
-    {
-        Logger = logger;
-    }
+    public SyncOverAsyncApi(ILogger<SyncOverAsyncApi> logger) => Logger = logger;
 
     [FunctionName("SyncOverAsyncApi_WeatherRequest")]
     [OpenApiOperation(operationId: "GetWeatherAsync", tags: new[] { "weather" })]
