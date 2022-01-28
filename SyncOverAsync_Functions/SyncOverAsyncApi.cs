@@ -19,7 +19,7 @@ public class SyncOverAsyncApi
         var requestId = randomGenerator.Next(Int32.MaxValue).ToString();
 
         // Start new orchestration and pass requestId as instance id.
-        await starter.StartNewAsync(nameof(RunOrchestrator), requestId.ToString());
+        await starter.StartNewAsync(nameof(RunOrchestrator), requestId);
         this.Logger.LogInformation($"Started orchestration for {requestId}");
 
         // Wait for orchestration to complete or timeout to occur
