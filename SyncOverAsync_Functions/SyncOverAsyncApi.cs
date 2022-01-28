@@ -18,7 +18,7 @@ public class SyncOverAsyncApi
         // Generate a random request Id
         var requestId = randomGenerator.Next(Int32.MaxValue).ToString();
 
-        // Start new orchestration
+        // Start new orchestration and pass requestId as instance id.
         await starter.StartNewAsync(nameof(RunOrchestrator), requestId.ToString());
         this.Logger.LogInformation($"Started orchestration for {requestId}");
 
@@ -40,7 +40,7 @@ public class SyncOverAsyncApi
     public async Task WeatherResponse([BlobTrigger("weather-results/{name}", Connection = "blobConnection")] Stream myBlob, string name,
                                    [DurableClient] IDurableOrchestrationClient client)
     {
-        // logic to retrieve the requestid (this one is looking at the file name
+        // Retrieve the requestid (this one looks at the file name)
         var requestId = name.Remove(name.IndexOf('.'));
         
         // Send notification to the orchestration instance specifying the event completion
