@@ -1,3 +1,5 @@
+using DurableTask.Core;
+
 namespace SyncOverAsync_Functions;
 
 public class SyncOverAsyncApi
@@ -42,9 +44,16 @@ public class SyncOverAsyncApi
     {
         // Retrieve the requestid (this one looks at the file name)
         var requestId = name.Remove(name.IndexOf('.'));
-        
+
         // Send notification to the orchestration instance specifying the event completion
         await client.RaiseEventAsync(requestId, eventName, new StreamReader(myBlob).ReadToEnd());
         this.Logger.LogInformation($"Received reply for Request:{name}");
+    }
+
+    [FunctionName(nameof(CleanUpOldWeatherResponsesAsync))]
+    public async Task CleanUpOldWeatherResponsesAsync([TimerTrigger("0 0 0 * * *")] /* execute every day */ TimerInfo myTimer, [DurableClient] IDurableOrchestrationClient client)
+    {
+        var result = await client.PurgeInstanceHistoryAsync(DateTime.UtcNow.AddDays(-15), DateTime.UtcNow.AddDays(-1), new List<OrchestrationStatus> { OrchestrationStatus.Completed, OrchestrationStatus.Terminated });
+        this.Logger.LogInformation("Cleaned up records: ", result?.InstancesDeleted);
     }
 }
